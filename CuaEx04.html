@@ -1,0 +1,595 @@
+<!doctype html>
+<html>
+<head>
+  <title>WebGL Demo</title>
+</head>
+
+<body>
+  <canvas id="output" width="800" height="800"></canvas>
+ <br>
+ <!-- USER INTERFACE -->
+ <button id="translateX">MOVE X</button>  
+ <button id="translateY">MOVE Y</button>
+ <button id="translate">MOVE</button>
+ <button id="scale">SCALE</button>
+ <button id="rotate">ROTATE</button>
+ <br>
+ X = <input type="text" id="tx" value="0">
+ Y = <input type="text" id="ty" value="0">
+ SCALE X by = <input type="text" id="Sx" value="1">
+ SCALE Y by = <input type="text" id="Sy" value="1">
+ ROTATE by = <input type="text" id="degrees" value="0"> degrees
+
+  
+   <script src="./utils/gl-matrix.js"></script>
+  <!-- VERTEX SHADER -->
+  <script id="vertex-shader" type="notjs">#version 300 es
+    in vec4 a_position;
+    in float a_point_size;
+    //transformation matrix
+    uniform mat4 u_transformation_matrix;
+    
+    //For view, model, and projection transformations
+    uniform mat4 u_model_matrix;
+    uniform mat4 u_view_matrix;
+    uniform mat4 u_projection_matrix;
+
+    void main() {
+      //Apply the transformations to the object to be rendered
+      gl_Position = u_transformation_matrix * u_view_matrix * u_model_matrix * u_projection_matrix * a_position;
+    }
+  </script>
+
+  <!-- FRAGMENT SHADER -->
+  <script id="fragment-shader" type="notjs">#version 300 es
+    precision mediump float;
+
+    uniform vec4 u_color;
+    out vec4 outColor;
+
+    void main(void) {
+      //outColor = vec4(1, 0, 0, 1); //red
+    
+      outColor = u_color;
+    }
+
+    
+  </script>
+
+  <!-- Function for creating and compiling shader programs -->
+  <script>
+  function createShader (gl, type, sourceCode) {
+  // Compiles either a shader of type gl.VERTEX_SHADER or gl.FRAGMENT_SHADER
+  var shader = gl.createShader( type );
+  gl.shaderSource( shader, sourceCode );
+  gl.compileShader( shader );
+
+  if ( !gl.getShaderParameter(shader, gl.COMPILE_STATUS) ) {
+    var info = gl.getShaderInfoLog( shader );
+    throw 'Could not compile WebGL program. \n\n' + info;
+  }
+  return shader;
+}
+</script>
+  
+  <!-- Main function contains: 
+    1) declaration of WebGL context
+    2) function calls to initialize the shader programs
+    3) declaration and binding of buffer object
+    4) function calls to perform transformations before drawing
+    5) draw/redraw functions
+  -->
+  <script> 
+    function main() {
+      const canvas = document.querySelector('#output');
+      if(!canvas){
+        console.log("Canvas element with specified ID ('output') cannot be found.");
+      }
+//const gl = initWebGL(canvas, true);
+      //Setting up the WebGL Context
+      const gl = canvas.getContext('webgl2');
+      const vertexShaderSource = document.querySelector('#vertex-shader').text;
+      const fragmentShaderSource = document.querySelector('#fragment-shader').text;
+      const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+      const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+      
+
+      //Creation and initialization of GL program 
+      var program = gl.createProgram();
+
+      // Attach pre-existing shaders
+      gl.attachShader(program, vertexShader);
+      gl.attachShader(program, fragmentShader);
+
+      gl.linkProgram(program);
+
+      if ( !gl.getProgramParameter( program, gl.LINK_STATUS) ) {
+        var info = gl.getProgramInfoLog(program);
+        throw 'Could not compile WebGL program. \n\n' + info;
+      }
+
+      // set the program created earlier
+      gl.useProgram(program);
+
+      // Declaration of pointers to the attributes
+      const aPositionPointer = gl.getAttribLocation(program, 'a_position');
+      const aPointSizePointer = gl.getAttribLocation(program, 'a_point_size');
+
+     var colorLocation = gl.getUniformLocation(program, "u_color");
+     
+     //Used for affine transformation
+     const uTransformationMatrixPointer = gl.getUniformLocation(program, 'u_transformation_matrix');
+
+     const uModelMatrixPointer = gl.getUniformLocation(program, 'u_model_matrix');
+      const uViewMatrixPointer = gl.getUniformLocation(program, 'u_view_matrix');
+      const uProjectionMatrixPointer = gl.getUniformLocation(program, 'u_projection_matrix');
+      
+
+      var vertices = [
+      // LEFT PART
+      // triangle fan
+      -0.2, 0.1929,
+      0, -0.0121,
+      0, 0.3879,
+      -0.23, 0.3654,
+      -0.5775, 0.6954,
+      -0.4675, 0.2754,
+      -0.495, 0.0679,
+      -0.6475, -0.3121,
+      -0.305, -0.0496,
+      -0.1125, -0.1196,
+      0, -0.0121,
+
+      // Triangles
+      -0.35, -0.1871,
+      -0.305, -0.0496,
+      -0.2675, -0.1271,
+
+      -0.35, -0.1871,
+      -0.44, -0.3271,
+      -0.1475, -0.346,
+
+      -0.35, -0.1871,
+      -0.6475, -0.3121,
+      -0.305, -0.0496,
+
+      -0.35, -0.1871,
+      -0.6475, -0.3121,
+      -0.44, -0.3271,
+
+      // Triangle Strip // Eye
+      -0.305, -0.0496,
+      -0.2675, -0.1271,
+      -0.1725, -0.0971,
+      -0.1725, -0.0971,
+      -0.2675, -0.1271,
+      -0.16, -0.1571,
+      -0.16, -0.1571,
+      -0.1725, -0.0971,
+      -0.1125, -0.1196,
+      -0.1125, -0.1196,
+      -0.105, -0.1696,
+      -0.16, -0.1571,
+
+      -0.495, 0.0679,
+      -0.4675, 0.2754,
+      -0.5775, 0.6954,
+
+      -0.1475, -0.346,
+      -0.2225, -0.4371,
+      -0.14, -0.6271,
+
+      -0.2225, -0.4371,
+      -0.1475, -0.346,
+      -0.44, -0.3271,
+
+
+      // nose
+      0, -0.6521,
+      0.0825, -0.5446,
+      -0.0825, -0.5446,
+
+      -0.0825, -0.5446,
+      0, -0.6521,
+      -0.0025, -0.582,
+
+      0.0025, -0.582,
+      0, -0.6521,
+      0.0825, -0.5446,
+
+      // top nose
+      -0.0575, -0.4971,
+      -0.0825, -0.5446,
+      -0.0025, -0.582,
+      -0.0025, -0.582,
+      -0.0575, -0.4971,
+      0.0575, -0.4971,
+      0.0575, -0.4971,
+      -0.0025, -0.582,
+      0.0825, -0.5446,
+
+      -0.2675, -0.1271,
+      -0.35, -0.1871,
+      -0.1475, -0.346,
+      -0.1475, -0.346,
+      -0.2675, -0.1271,
+      -0.095, -0.2271,
+      -0.095, -0.2271,
+      -0.2675, -0.1271,
+      -0.105, -0.1696,
+
+      // chin
+      -0.1475, -0.346,
+      -0.14, -0.6271,
+      -0.0825, -0.5446,
+
+      -0.0825, -0.5446,
+      0, -0.6521,
+      -0.14, -0.6271,
+
+      -0.14, -0.6271,
+      0, -0.6521,
+      -0.0012, -0.6968,
+
+      0.0012, -0.6968,
+      0, -0.6521,
+      0.14, -0.6271,
+
+      0.14, -0.6271,
+      0, -0.6521,
+      0.0825, -0.5446,
+
+      0.0825, -0.5446,
+      0.14, -0.6271,
+      0.1475, -0.346,
+
+      // middle
+      0, -0.0121,
+      -0.1125, -0.1196,
+      0.1125, -0.1196,
+
+      -0.095, -0.2271,
+      -0.1475, -0.346,
+      -0.0825, -0.5446,
+
+      0.095, -0.2271,
+      0.1475, -0.346,
+      0.0825, -0.5446,
+
+      -0.095, -0.2271,
+      -0.0825, -0.5446,
+      -0.0575, -0.4971,
+
+      0.095, -0.2271,
+      0.0825, -0.5446,
+      0.0575, -0.4971,
+
+      // Middle | Triangle Strip
+      -0.095, -0.2271,
+      -0.0575, -0.4971,
+      0.0575, -0.4971,
+      0.0575, -0.4971,
+      -0.095, -0.2271,
+      0.095, -0.2271,
+
+      // Middle | Triangle Strip
+      -0.1125, -0.1196,
+      -0.095, -0.2271,
+      0.095, -0.2271,
+
+      0.095, -0.2271,
+      -0.1125, -0.1196,
+      0.1125, -0.1196,
+
+      // Right Part
+      // triangle fan
+      0.2, 0.1929,
+      0, -0.0121,
+      0, 0.3879,
+      0.23, 0.3654,
+      0.5775, 0.6954,
+      0.4675, 0.2754,
+      0.495, 0.0679,
+      0.6475, -0.3121,
+      0.305, -0.0496,
+      0.1125, -0.1196,
+      0, -0.0121,
+
+      // Triangle Strip // Eye
+      0.305, -0.0496,
+      0.2675, -0.1271,
+      0.1725, -0.0971,
+      0.1725, -0.0971,
+      0.2675, -0.1271,
+      0.16, -0.1571,
+      0.16, -0.1571,
+      0.1725, -0.0971,
+      0.1125, -0.1196,
+      0.1125, -0.1196,
+      0.105, -0.1696,
+      0.16, -0.1571,
+
+      // Triangles
+      0.35, -0.1871,
+      0.305, -0.0496,
+      0.2675, -0.1271,
+
+      0.35, -0.1871,
+      0.44, -0.3271,
+      0.1475, -0.346,
+
+      0.35, -0.1871,
+      0.6475, -0.3121,
+      0.305, -0.0496,
+
+      0.35, -0.1871,
+      0.6475, -0.3121,
+      0.44, -0.3271,
+
+      0.495, 0.0679,
+      0.4675, 0.2754,
+      0.5775, 0.6954,
+
+      0.1475, -0.346,
+      0.2225, -0.4371,
+      0.14, -0.6271,
+
+      0.2225, -0.4371,
+      0.1475, -0.346,
+      0.44, -0.3271,
+
+      // Middle | Triangle Strip
+      0.2675, -0.1271,
+      0.35, -0.1871,
+      0.1475, -0.346,
+      0.1475, -0.346,
+      0.2675, -0.1271,
+      0.095, -0.2271,
+      0.095, -0.2271,
+      0.2675, -0.1271,
+      0.105, -0.1696,
+     ];
+
+      
+      //Initializing the variables and tranformation matrix
+      var varx=0, vary=0;
+      var mulx=1, muly=1;
+      var mulx1=0, muly1=0;
+      var transformationMatrix = [
+        mulx,mulx1,0,0,
+        muly1,muly,0,0,
+        0,0,1,0,
+        varx,vary,0,1
+      ];
+
+    
+
+      const buffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+      gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+      // setup model matrix;
+      const modelMatrix = glMatrix.mat4.create();
+      glMatrix.mat4.rotateZ(modelMatrix, modelMatrix, glMatrix.glMatrix.toRadian(0));
+
+      // setup view matrix
+      const viewMatrix = glMatrix.mat4.create();
+      glMatrix.mat4.lookAt(viewMatrix,[0,0,0,1],[0,0,0,1],[0,1,0,0]);
+      
+
+      // setup projection matrix
+      const projectionMatrix = glMatrix.mat4.create();
+      // parameters to set parallel projection
+      var left = -1;
+      var right = 1;
+      var bottom = -1;
+      var top = 1;
+      var near = -1;
+      var far = 1;
+      glMatrix.mat4.ortho(projectionMatrix, left, right, bottom, top, near, far);
+
+     
+
+// function to draw the scene from the user inputs
+      function drawScene() {
+      
+      // enable attrib array
+      gl.enableVertexAttribArray(aPositionPointer);
+      
+      // load uniforms (only done once; since values are same for all vertices)
+      gl.uniformMatrix4fv(uModelMatrixPointer, false, new Float32Array(modelMatrix));
+      gl.uniformMatrix4fv(uViewMatrixPointer, false, new Float32Array(viewMatrix));
+      gl.uniformMatrix4fv(uProjectionMatrixPointer, false, new Float32Array(projectionMatrix));
+              // set values
+        gl.uniformMatrix4fv(uTransformationMatrixPointer, false, new Float32Array(transformationMatrix));
+      
+        // clear the screen
+        gl.clearColor(.6602, .6602, .6602, 1.0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+
+      //same for the other object to be drawn
+      // gl.uniform4fv(colorLocation, color2);
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      gl.vertexAttribPointer(aPositionPointer, 2, gl.FLOAT, false, 0, 0);
+      gl.uniform4f(colorLocation, 0.9766, 0.5039, 0.1406, 1.0);
+      gl.drawArrays(gl.TRIANGLE_FAN, 0, 11);
+
+      gl.uniform4f(colorLocation, 0.7969, 0.8047, 0.7930, 1.0);
+      gl.drawArrays(gl.TRIANGLES, 11, 3);
+
+      gl.uniform4f(colorLocation, 0.8984, 0.9023, 0.9023, 1.0);
+      gl.drawArrays(gl.TRIANGLES, 14, 3);
+
+      gl.uniform4f(colorLocation, 0.9063, 0.9063, 0.9063, 1.0);
+      gl.drawArrays(gl.TRIANGLES, 17, 3);
+
+      gl.uniform4f(colorLocation, 0.9063, 0.9063, 0.9063, 0.9);
+      gl.drawArrays(gl.TRIANGLES, 20, 3);
+
+      // Triangle Strip
+      gl.uniform4f(colorLocation, 0.2383, 0.1836, 0.1602, 0.9); // EYE
+      gl.drawArrays(gl.TRIANGLE_STRIP, 23, 12);
+
+      gl.uniform4f(colorLocation, 0.9063, 0.4531, 0.1250, 0.9);
+      gl.drawArrays(gl.TRIANGLES, 35, 3);
+
+      gl.uniform4f(colorLocation, 0.8353, 0.8353, 0.8314, 0.9);
+      gl.drawArrays(gl.TRIANGLES, 38, 3);
+
+      gl.uniform4f(colorLocation, 0.7969, 0.8047, 0.7930, 1.0);
+      gl.drawArrays(gl.TRIANGLES, 41, 3);
+
+      // nose
+      gl.uniform4f(colorLocation, 0.0000, 0.0000, 0.0000, 0.9);
+      gl.drawArrays(gl.TRIANGLES, 44, 3);
+
+      gl.uniform4f(colorLocation, 0.2383, 0.1836, 0.1602, 0.9);
+      gl.drawArrays(gl.TRIANGLES, 47, 3);
+
+      gl.uniform4f(colorLocation, 0.2383, 0.1836, 0.1602, 0.9);
+      gl.drawArrays(gl.TRIANGLES, 50, 3);
+
+      gl.uniform4f(colorLocation, 0.0000, 0.0000, 0.0000, 0.9);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 53, 9);
+
+      gl.uniform4f(colorLocation, 0.9063, 0.9063, 0.9063, 0.9);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 62, 9);
+
+      // chin
+      gl.uniform4f(colorLocation, 0.9063, 0.9063, 0.9063, 0.9);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 71, 18);
+
+      // middle
+      gl.uniform4f(colorLocation, 0.9255, 0.3569, 0.1294, 0.9);
+      gl.drawArrays(gl.TRIANGLES, 89, 3);
+
+      gl.uniform4f(colorLocation, 0.9647, 0.5765, 0.1294, 0.9);
+      gl.drawArrays(gl.TRIANGLES, 92, 3);
+
+      gl.uniform4f(colorLocation, 0.9647, 0.5765, 0.1294, 0.9);
+      gl.drawArrays(gl.TRIANGLES, 95, 3);
+
+      gl.uniform4f(colorLocation, 0.9765, 0.4941, 0.1373, 0.9);
+      gl.drawArrays(gl.TRIANGLES, 98, 3);
+
+      gl.uniform4f(colorLocation, 0.9765, 0.4941, 0.1373, 0.9);
+      gl.drawArrays(gl.TRIANGLES, 101, 3);
+
+      gl.uniform4f(colorLocation, 0.9255, 0.3569, 0.1294, 0.9);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 104, 6);
+
+      gl.uniform4f(colorLocation, 0.9255, 0.3569, 0.1294, 0.9);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 110, 6);
+
+      gl.uniform4f(colorLocation, 0.9766, 0.5039, 0.1406, 1.0);
+      gl.drawArrays(gl.TRIANGLE_FAN, 116, 11);
+
+      // Triangle Strip
+      gl.uniform4f(colorLocation, 0.2383, 0.1836, 0.1602, 0.9); // EYE
+      gl.drawArrays(gl.TRIANGLE_STRIP, 127, 12);
+
+      // Draw triangles
+      gl.uniform4f(colorLocation, 0.7969, 0.8047, 0.7930, 1.0);
+      gl.drawArrays(gl.TRIANGLES, 139, 3);
+
+      gl.uniform4f(colorLocation, 0.8984, 0.9023, 0.9023, 1.0);
+      gl.drawArrays(gl.TRIANGLES, 142, 3);
+
+      gl.uniform4f(colorLocation, 0.9063, 0.9063, 0.9063, 1.0);
+      gl.drawArrays(gl.TRIANGLES, 145, 3);
+
+      gl.uniform4f(colorLocation, 0.9063, 0.9063, 0.9063, 0.9);
+      gl.drawArrays(gl.TRIANGLES, 148, 3);
+
+      gl.uniform4f(colorLocation, 0.9063, 0.4531, 0.1250, 0.9);
+      gl.drawArrays(gl.TRIANGLES, 151, 3);
+
+      gl.uniform4f(colorLocation, 0.8353, 0.8353, 0.8314, 0.9);
+      gl.drawArrays(gl.TRIANGLES, 154, 3);
+
+      gl.uniform4f(colorLocation, 0.7969, 0.8047, 0.7930, 1.0);
+      gl.drawArrays(gl.TRIANGLES, 157, 3);
+
+      gl.uniform4f(colorLocation, 0.9063, 0.9063, 0.9063, 0.9);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 160, 9);
+
+      }
+
+      // initial render
+      drawScene();
+
+      function redraw(code){
+      	return function(){
+          //Declaration and initialization of translation,scaling,rotation factors
+      		let tr_x=0, tr_y=0, Sx=1, Sy=1;
+      	  let angle = 0;
+      	
+        	if (code=="tx") tr_x = (document.getElementById("tx")).value; 
+      		if (code=="ty") tr_y = (document.getElementById("ty")).value;
+          if (code=="both"){
+            tr_x = (document.getElementById("tx")).value; 
+            tr_y = (document.getElementById("ty")).value;
+          }
+          if (code == "degrees") angle = (document.getElementById("degrees")).value; 
+          
+          varx = parseFloat(varx) + parseFloat(tr_x)
+          vary = parseFloat(vary) + parseFloat(tr_y)
+
+          
+          if (code!="scaled"){
+            if (code == "degrees"){
+              //For ROTATION
+              
+              glMatrix.mat4.rotateZ(modelMatrix, modelMatrix, glMatrix.glMatrix.toRadian(angle));
+            } else {
+              transformationMatrix = [
+              mulx,mulx1,0,0,
+              muly1,muly,0,0,
+              0,0,1,0,
+              varx,vary,0,1
+              ];
+            }
+          }
+          if (code=="scaled"){
+            Sx = (document.getElementById("Sx")).value;
+            Sy = (document.getElementById("Sy")).value;
+
+            mulx = parseFloat(mulx) * parseFloat(Sx)
+            muly = parseFloat(muly) * parseFloat(Sy)
+
+            //Transformation matrix when scaling
+            transformationMatrix = [
+            mulx,mulx1,0,0,
+            muly1,muly,0,0,
+            0,0,1,0,
+            varx,vary,0,1
+            ];
+
+          
+          }
+
+          //For ROTATION
+          let radians = Math.PI*degrees/180;
+          let cosValue = Math.cos(radians);
+          let sinValue = Math.sin(radians);
+      	
+
+      	  
+        //rendering again after reflecting the transformations
+      	drawScene();
+      }
+      }
+
+      //Event listeners for user inputs for the transformations
+     document.getElementById("translateX").addEventListener("click", redraw("tx"));
+     document.getElementById("translateY").addEventListener("click", redraw("ty"));
+     document.getElementById("translate").addEventListener("click", redraw("both"));
+     document.getElementById("scale").addEventListener("click",redraw("scaled"));
+     document.getElementById("rotate").addEventListener("click",redraw("degrees"));
+}
+    // call the main program
+    main();
+  </script>
+</body>
+</html>
