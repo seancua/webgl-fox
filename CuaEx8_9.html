@@ -19,7 +19,60 @@
  SCALE X by = <input type="text" id="Sx" value="1">
  SCALE Y by = <input type="text" id="Sy" value="1">
  ROTATE by = <input type="text" id="degrees" value="0"> degrees
+ <br>
+ angleX: <input type="range" min="0" max="360" value="0" class="slider" id="rotX">
+ angleY: <input type="range" min="0" max="360" value="0" class="slider" id="rotY">
+ angleZ: <input type="range" min="0" max="360" value="0" class="slider" id="rotZ">
+<br>
+ translateX: <input type="range" min="0" max="800" value="0" class="slider" id="tranX">
+ translateY: <input type="range" min="0" max="800" value="0" class="slider" id="tranY">
+ translateZ: <input type="range" min="0" max="800" value="0" class="slider" id="tranZ">
+ <br>
+ srcRGB: 
+ <select name="srcrgb" id="srcrgb">
+  <option value="blend1">Blend 1</option>
+  <option value="blend2">Blend 2</option>
+  <option value="blend3">Blend 3</option>
+  <option value="blend4">Blend 4</option>
+  <option value="blend5">Blend 5</option>
+  <option value="blend6">Blend 6</option>
+  <option value="blend7">Blend 7</option>
+  <option value="blend8">Blend 8</option>
+  <option value="blend9">Blend 9</option>
+  <option value="blend10">Blend 10</option>
+  <option value="blend11">Blend 11</option>
+  <option value="blend12">Blend 12</option>
+  <option value="blend13">Blend 13</option>
+  <option value="blend14">Blend 14</option>
+  <option value="blend15">Blend 15</option>
+ </select>
+ dstRGB: 
+ <select name="dstrgb" id="dstrgb">
+  <option value="blend1">Blend 1</option>
+  <option value="blend2">Blend 2</option>
+  <option value="blend3">Blend 3</option>
+  <option value="blend4">Blend 4</option>
+  <option value="blend5">Blend 5</option>
+  <option value="blend6">Blend 6</option>
+  <option value="blend7">Blend 7</option>
+  <option value="blend8">Blend 8</option>
+  <option value="blend9">Blend 9</option>
+  <option value="blend10">Blend 10</option>
+  <option value="blend11">Blend 11</option>
+  <option value="blend12">Blend 12</option>
+  <option value="blend13">Blend 13</option>
+  <option value="blend14">Blend 14</option>
+  <option value="blend15">Blend 15</option>
+ </select>
+ Blending Function: 
+ <select name="blendfunc" id="blendfunc">
+  <option value="blend1">Additive</option>
+  <option value="blend2">Subtractive</option>
+ </select>
 
+
+
+ <button id="alphablend">BLEND</button>
   
    <script src="./utils/gl-matrix.js"></script>
   <!-- VERTEX SHADER -->
@@ -119,460 +172,241 @@
      
      //Used for affine transformation
     const uTransformationMatrixPointer = gl.getUniformLocation(program, 'u_transformation_matrix');
-
     const uModelMatrixPointer = gl.getUniformLocation(program, 'u_model_matrix');
     const uViewMatrixPointer = gl.getUniformLocation(program, 'u_view_matrix');
     const uProjectionMatrixPointer = gl.getUniformLocation(program, 'u_projection_matrix');
+
+    var square = [
+      -0.75,-0.45,-0.5,1,
+      -0.75, 0.15,-0.5,1,
+      0.75, 0.15,-0.5,1,
+      0.75,-0.45,-0.5,1
+    ]
       
 
     var vertices = [
       // LEFT PART
       // triangle fan
-      -0.2, 0.1929,
-      0, -0.0121,
-      0, 0.3879,
-      -0.23, 0.3654,
-      -0.5775, 0.6954,
-      -0.4675, 0.2754,
-      -0.495, 0.0679,
-      -0.6475, -0.3121,
-      -0.305, -0.0496,
-      -0.1125, -0.1196,
-      0, -0.0121,
+      -0.2, 0.1929, 0.1, 1,
+      0, -0.0121, 0.1, 1,
+      0, 0.3879, 0.1, 1,
+      -0.23, 0.3654, 0.1, 1,
+      -0.5775, 0.6954, 0.1, 1,
+      -0.4675, 0.2754, 0.1, 1,
+      -0.495, 0.0679, 0.1, 1,
+      -0.6475, -0.3121, 0.1, 1,
+      -0.305, -0.0496, 0.1, 1,
+      -0.1125, -0.1196, 0.1, 1,
+      0, -0.0121, 0.1, 1,
 
       // Triangles
-      -0.35, -0.1871,
-      -0.305, -0.0496,
-      -0.2675, -0.1271,
+      -0.35, -0.1871, 0.1, 1,
+      -0.305, -0.0496, 0.1, 1,
+      -0.2675, -0.1271, 0.1, 1,
 
-      -0.35, -0.1871,
-      -0.44, -0.3271,
-      -0.1475, -0.346,
+      -0.35, -0.1871, 0.1, 1,
+      -0.44, -0.3271, 0.1, 1,
+      -0.1475, -0.346, 0.1, 1,
 
-      -0.35, -0.1871,
-      -0.6475, -0.3121,
-      -0.305, -0.0496,
+      -0.35, -0.1871, 0.1, 1,
+      -0.6475, -0.3121, 0.1, 1,
+      -0.305, -0.0496, 0.1, 1,
 
-      -0.35, -0.1871,
-      -0.6475, -0.3121,
-      -0.44, -0.3271,
+      -0.35, -0.1871, 0.1, 1,
+      -0.6475, -0.3121, 0.1, 1,
+      -0.44, -0.3271, 0.1, 1,
 
       // Triangle Strip // Eye
-      -0.305, -0.0496,
-      -0.2675, -0.1271,
-      -0.1725, -0.0971,
-      -0.1725, -0.0971,
-      -0.2675, -0.1271,
-      -0.16, -0.1571,
-      -0.16, -0.1571,
-      -0.1725, -0.0971,
-      -0.1125, -0.1196,
-      -0.1125, -0.1196,
-      -0.105, -0.1696,
-      -0.16, -0.1571,
+      -0.305, -0.0496, 0.1, 1,
+      -0.2675, -0.1271, 0.1, 1,
+      -0.1725, -0.0971, 0.1, 1,
+      -0.1725, -0.0971, 0.1, 1,
+      -0.2675, -0.1271, 0.1, 1,
+      -0.16, -0.1571, 0.1, 1,
+      -0.16, -0.1571, 0.1, 1,
+      -0.1725, -0.0971, 0.1, 1,
+      -0.1125, -0.1196, 0.1, 1,
+      -0.1125, -0.1196, 0.1, 1,
+      -0.105, -0.1696, 0.1, 1,
+      -0.16, -0.1571, 0.1, 1,
 
-      -0.495, 0.0679,
-      -0.4675, 0.2754,
-      -0.5775, 0.6954,
+      -0.495, 0.0679, 0.1, 1,
+      -0.4675, 0.2754, 0.1, 1,
+      -0.5775, 0.6954, 0.1, 1,
 
-      -0.1475, -0.346,
-      -0.2225, -0.4371,
-      -0.14, -0.6271,
+      -0.1475, -0.346, 0.1, 1,
+      -0.2225, -0.4371, 0.1, 1,
+      -0.14, -0.6271, 0.1, 1,
 
-      -0.2225, -0.4371,
-      -0.1475, -0.346,
-      -0.44, -0.3271,
+      -0.2225, -0.4371, 0.1, 1,
+      -0.1475, -0.346, 0.1, 1,
+      -0.44, -0.3271, 0.1, 1,
 
 
       // nose
-      0, -0.6521,
-      0.0825, -0.5446,
-      -0.0825, -0.5446,
+      0, -0.6521, 0.1, 1,
+      0.0825, -0.5446, 0.1, 1,
+      -0.0825, -0.5446, 0.1, 1,
 
-      -0.0825, -0.5446,
-      0, -0.6521,
-      -0.0025, -0.582,
+      -0.0825, -0.5446, 0.1, 1,
+      0, -0.6521, 0.1, 1,
+      -0.0025, -0.582, 0.1, 1,
 
-      0.0025, -0.582,
-      0, -0.6521,
-      0.0825, -0.5446,
+      0.0025, -0.582, 0.1, 1,
+      0, -0.6521, 0.1, 1,
+      0.0825, -0.5446, 0.1, 1,
 
       // top nose
-      -0.0575, -0.4971,
-      -0.0825, -0.5446,
-      -0.0025, -0.582,
-      -0.0025, -0.582,
-      -0.0575, -0.4971,
-      0.0575, -0.4971,
-      0.0575, -0.4971,
-      -0.0025, -0.582,
-      0.0825, -0.5446,
+      -0.0575, -0.4971, 0.1, 1,
+      -0.0825, -0.5446, 0.1, 1,
+      -0.0025, -0.582, 0.1, 1,
+      -0.0025, -0.582, 0.1, 1,
+      -0.0575, -0.4971, 0.1, 1,
+      0.0575, -0.4971, 0.1, 1,
+      0.0575, -0.4971, 0.1, 1,
+      -0.0025, -0.582, 0.1, 1,
+      0.0825, -0.5446, 0.1, 1,
 
-      -0.2675, -0.1271,
-      -0.35, -0.1871,
-      -0.1475, -0.346,
-      -0.1475, -0.346,
-      -0.2675, -0.1271,
-      -0.095, -0.2271,
-      -0.095, -0.2271,
-      -0.2675, -0.1271,
-      -0.105, -0.1696,
+      -0.2675, -0.1271, 0.1, 1,
+      -0.35, -0.1871, 0.1, 1,
+      -0.1475, -0.346, 0.1, 1,
+      -0.1475, -0.346, 0.1, 1,
+      -0.2675, -0.1271, 0.1, 1,
+      -0.095, -0.2271, 0.1, 1,
+      -0.095, -0.2271, 0.1, 1,
+      -0.2675, -0.1271, 0.1, 1,
+      -0.105, -0.1696, 0.1, 1,
 
       // chin
-      -0.1475, -0.346,
-      -0.14, -0.6271,
-      -0.0825, -0.5446,
+      -0.1475, -0.346, 0.1, 1,
+      -0.14, -0.6271, 0.1, 1,
+      -0.0825, -0.5446, 0.1, 1,
 
-      -0.0825, -0.5446,
-      0, -0.6521,
-      -0.14, -0.6271,
+      -0.0825, -0.5446, 0.1, 1,
+      0, -0.6521, 0.1, 1,
+      -0.14, -0.6271, 0.1, 1,
 
-      -0.14, -0.6271,
-      0, -0.6521,
-      -0.0012, -0.6968,
+      -0.14, -0.6271, 0.1, 1,
+      0, -0.6521, 0.1, 1,
+      -0.0012, -0.6968, 0.1, 1,
 
-      0.0012, -0.6968,
-      0, -0.6521,
-      0.14, -0.6271,
+      0.0012, -0.6968, 0.1, 1,
+      0, -0.6521, 0.1, 1,
+      0.14, -0.6271, 0.1, 1,
 
-      0.14, -0.6271,
-      0, -0.6521,
-      0.0825, -0.5446,
+      0.14, -0.6271, 0.1, 1,
+      0, -0.6521, 0.1, 1,
+      0.0825, -0.5446, 0.1, 1,
 
-      0.0825, -0.5446,
-      0.14, -0.6271,
-      0.1475, -0.346,
+      0.0825, -0.5446, 0.1, 1,
+      0.14, -0.6271, 0.1, 1,
+      0.1475, -0.346, 0.1, 1,
 
       // middle
-      0, -0.0121,
-      -0.1125, -0.1196,
-      0.1125, -0.1196,
+      0, -0.0121, 0.1, 1,
+      -0.1125, -0.1196, 0.1, 1,
+      0.1125, -0.1196, 0.1, 1,
 
-      -0.095, -0.2271,
-      -0.1475, -0.346,
-      -0.0825, -0.5446,
+      -0.095, -0.2271, 0.1, 1,
+      -0.1475, -0.346, 0.1, 1,
+      -0.0825, -0.5446, 0.1, 1,
 
-      0.095, -0.2271,
-      0.1475, -0.346,
-      0.0825, -0.5446,
+      0.095, -0.2271, 0.1, 1,
+      0.1475, -0.346, 0.1, 1,
+      0.0825, -0.5446, 0.1, 1,
 
-      -0.095, -0.2271,
-      -0.0825, -0.5446,
-      -0.0575, -0.4971,
+      -0.095, -0.2271, 0.1, 1,
+      -0.0825, -0.5446, 0.1, 1,
+      -0.0575, -0.4971, 0.1, 1,
 
-      0.095, -0.2271,
-      0.0825, -0.5446,
-      0.0575, -0.4971,
-
-      // Middle | Triangle Strip
-      -0.095, -0.2271,
-      -0.0575, -0.4971,
-      0.0575, -0.4971,
-      0.0575, -0.4971,
-      -0.095, -0.2271,
-      0.095, -0.2271,
+      0.095, -0.2271, 0.1, 1,
+      0.0825, -0.5446, 0.1, 1,
+      0.0575, -0.4971, 0.1, 1,
 
       // Middle | Triangle Strip
-      -0.1125, -0.1196,
-      -0.095, -0.2271,
-      0.095, -0.2271,
+      -0.095, -0.2271, 0.1, 1,
+      -0.0575, -0.4971, 0.1, 1,
+      0.0575, -0.4971, 0.1, 1,
+      0.0575, -0.4971, 0.1, 1,
+      -0.095, -0.2271, 0.1, 1,
+      0.095, -0.2271, 0.1, 1,
 
-      0.095, -0.2271,
-      -0.1125, -0.1196,
-      0.1125, -0.1196,
+      // Middle | Triangle Strip
+      -0.1125, -0.1196, 0.1, 1,
+      -0.095, -0.2271, 0.1, 1,
+      0.095, -0.2271, 0.1, 1,
+
+      0.095, -0.2271, 0.1, 1,
+      -0.1125, -0.1196, 0.1, 1,
+      0.1125, -0.1196, 0.1, 1,
 
       // Right Part
       // triangle fan
-      0.2, 0.1929,
-      0, -0.0121,
-      0, 0.3879,
-      0.23, 0.3654,
-      0.5775, 0.6954,
-      0.4675, 0.2754,
-      0.495, 0.0679,
-      0.6475, -0.3121,
-      0.305, -0.0496,
-      0.1125, -0.1196,
-      0, -0.0121,
+      0.2, 0.1929, 0.1, 1,
+      0, -0.0121, 0.1, 1,
+      0, 0.3879, 0.1, 1,
+      0.23, 0.3654, 0.1, 1,
+      0.5775, 0.6954, 0.1, 1,
+      0.4675, 0.2754, 0.1, 1,
+      0.495, 0.0679, 0.1, 1,
+      0.6475, -0.3121, 0.1, 1,
+      0.305, -0.0496, 0.1, 1,
+      0.1125, -0.1196, 0.1, 1,
+      0, -0.0121, 0.1, 1,
 
       // Triangle Strip // Eye
-      0.305, -0.0496,
-      0.2675, -0.1271,
-      0.1725, -0.0971,
-      0.1725, -0.0971,
-      0.2675, -0.1271,
-      0.16, -0.1571,
-      0.16, -0.1571,
-      0.1725, -0.0971,
-      0.1125, -0.1196,
-      0.1125, -0.1196,
-      0.105, -0.1696,
-      0.16, -0.1571,
+      0.305, -0.0496, 0.1, 1,
+      0.2675, -0.1271, 0.1, 1,
+      0.1725, -0.0971, 0.1, 1,
+      0.1725, -0.0971, 0.1, 1,
+      0.2675, -0.1271, 0.1, 1,
+      0.16, -0.1571, 0.1, 1,
+      0.16, -0.1571, 0.1, 1,
+      0.1725, -0.0971, 0.1, 1,
+      0.1125, -0.1196, 0.1, 1,
+      0.1125, -0.1196, 0.1, 1,
+      0.105, -0.1696, 0.1, 1,
+      0.16, -0.1571, 0.1, 1,
 
       // Triangles
-      0.35, -0.1871,
-      0.305, -0.0496,
-      0.2675, -0.1271,
+      0.35, -0.1871, 0.1, 1,
+      0.305, -0.0496, 0.1, 1,
+      0.2675, -0.1271, 0.1, 1,
 
-      0.35, -0.1871,
-      0.44, -0.3271,
-      0.1475, -0.346,
+      0.35, -0.1871, 0.1, 1,
+      0.44, -0.3271, 0.1, 1,
+      0.1475, -0.346, 0.1, 1,
 
-      0.35, -0.1871,
-      0.6475, -0.3121,
-      0.305, -0.0496,
+      0.35, -0.1871, 0.1, 1,
+      0.6475, -0.3121, 0.1, 1,
+      0.305, -0.0496, 0.1, 1,
 
-      0.35, -0.1871,
-      0.6475, -0.3121,
-      0.44, -0.3271,
+      0.35, -0.1871, 0.1, 1,
+      0.6475, -0.3121, 0.1, 1,
+      0.44, -0.3271, 0.1, 1,
 
-      0.495, 0.0679,
-      0.4675, 0.2754,
-      0.5775, 0.6954,
+      0.495, 0.0679, 0.1, 1,
+      0.4675, 0.2754, 0.1, 1,
+      0.5775, 0.6954, 0.1, 1,
 
-      0.1475, -0.346,
-      0.2225, -0.4371,
-      0.14, -0.6271,
+      0.1475, -0.346, 0.1, 1,
+      0.2225, -0.4371, 0.1, 1,
+      0.14, -0.6271, 0.1, 1,
 
-      0.2225, -0.4371,
-      0.1475, -0.346,
-      0.44, -0.3271,
-
-      // Middle | Triangle Strip
-      0.2675, -0.1271,
-      0.35, -0.1871,
-      0.1475, -0.346,
-      0.1475, -0.346,
-      0.2675, -0.1271,
-      0.095, -0.2271,
-      0.095, -0.2271,
-      0.2675, -0.1271,
-      0.105, -0.1696,
-     ];
-
-    var vertices2 = [
-      // LEFT PART
-      // triangle fan
-      -0.2, 0.1929,
-      0, -0.0121,
-      0, 0.3879,
-      -0.23, 0.3654,
-      -0.5775, 0.6954,
-      -0.4675, 0.2754,
-      -0.495, 0.0679,
-      -0.6475, -0.3121,
-      -0.305, -0.0496,
-      -0.1125, -0.1196,
-      0, -0.0121,
-
-      // Triangles
-      -0.35, -0.1871,
-      -0.305, -0.0496,
-      -0.2675, -0.1271,
-
-      -0.35, -0.1871,
-      -0.44, -0.3271,
-      -0.1475, -0.346,
-
-      -0.35, -0.1871,
-      -0.6475, -0.3121,
-      -0.305, -0.0496,
-
-      -0.35, -0.1871,
-      -0.6475, -0.3121,
-      -0.44, -0.3271,
-
-      // Triangle Strip // Eye
-      -0.305, -0.0496,
-      -0.2675, -0.1271,
-      -0.1725, -0.0971,
-      -0.1725, -0.0971,
-      -0.2675, -0.1271,
-      -0.16, -0.1571,
-      -0.16, -0.1571,
-      -0.1725, -0.0971,
-      -0.1125, -0.1196,
-      -0.1125, -0.1196,
-      -0.105, -0.1696,
-      -0.16, -0.1571,
-
-      -0.495, 0.0679,
-      -0.4675, 0.2754,
-      -0.5775, 0.6954,
-
-      -0.1475, -0.346,
-      -0.2225, -0.4371,
-      -0.14, -0.6271,
-
-      -0.2225, -0.4371,
-      -0.1475, -0.346,
-      -0.44, -0.3271,
-
-
-      // nose
-      0, -0.6521,
-      0.0825, -0.5446,
-      -0.0825, -0.5446,
-
-      -0.0825, -0.5446,
-      0, -0.6521,
-      -0.0025, -0.582,
-
-      0.0025, -0.582,
-      0, -0.6521,
-      0.0825, -0.5446,
-
-      // top nose
-      -0.0575, -0.4971,
-      -0.0825, -0.5446,
-      -0.0025, -0.582,
-      -0.0025, -0.582,
-      -0.0575, -0.4971,
-      0.0575, -0.4971,
-      0.0575, -0.4971,
-      -0.0025, -0.582,
-      0.0825, -0.5446,
-
-      -0.2675, -0.1271,
-      -0.35, -0.1871,
-      -0.1475, -0.346,
-      -0.1475, -0.346,
-      -0.2675, -0.1271,
-      -0.095, -0.2271,
-      -0.095, -0.2271,
-      -0.2675, -0.1271,
-      -0.105, -0.1696,
-
-      // chin
-      -0.1475, -0.346,
-      -0.14, -0.6271,
-      -0.0825, -0.5446,
-
-      -0.0825, -0.5446,
-      0, -0.6521,
-      -0.14, -0.6271,
-
-      -0.14, -0.6271,
-      0, -0.6521,
-      -0.0012, -0.6968,
-
-      0.0012, -0.6968,
-      0, -0.6521,
-      0.14, -0.6271,
-
-      0.14, -0.6271,
-      0, -0.6521,
-      0.0825, -0.5446,
-
-      0.0825, -0.5446,
-      0.14, -0.6271,
-      0.1475, -0.346,
-
-      // middle
-      0, -0.0121,
-      -0.1125, -0.1196,
-      0.1125, -0.1196,
-
-      -0.095, -0.2271,
-      -0.1475, -0.346,
-      -0.0825, -0.5446,
-
-      0.095, -0.2271,
-      0.1475, -0.346,
-      0.0825, -0.5446,
-
-      -0.095, -0.2271,
-      -0.0825, -0.5446,
-      -0.0575, -0.4971,
-
-      0.095, -0.2271,
-      0.0825, -0.5446,
-      0.0575, -0.4971,
+      0.2225, -0.4371, 0.1, 1,
+      0.1475, -0.346, 0.1, 1,
+      0.44, -0.3271, 0.1, 1,
 
       // Middle | Triangle Strip
-      -0.095, -0.2271,
-      -0.0575, -0.4971,
-      0.0575, -0.4971,
-      0.0575, -0.4971,
-      -0.095, -0.2271,
-      0.095, -0.2271,
-
-      // Middle | Triangle Strip
-      -0.1125, -0.1196,
-      -0.095, -0.2271,
-      0.095, -0.2271,
-
-      0.095, -0.2271,
-      -0.1125, -0.1196,
-      0.1125, -0.1196,
-
-      // Right Part
-      // triangle fan
-      0.2, 0.1929,
-      0, -0.0121,
-      0, 0.3879,
-      0.23, 0.3654,
-      0.5775, 0.6954,
-      0.4675, 0.2754,
-      0.495, 0.0679,
-      0.6475, -0.3121,
-      0.305, -0.0496,
-      0.1125, -0.1196,
-      0, -0.0121,
-
-      // Triangle Strip // Eye
-      0.305, -0.0496,
-      0.2675, -0.1271,
-      0.1725, -0.0971,
-      0.1725, -0.0971,
-      0.2675, -0.1271,
-      0.16, -0.1571,
-      0.16, -0.1571,
-      0.1725, -0.0971,
-      0.1125, -0.1196,
-      0.1125, -0.1196,
-      0.105, -0.1696,
-      0.16, -0.1571,
-
-      // Triangles
-      0.35, -0.1871,
-      0.305, -0.0496,
-      0.2675, -0.1271,
-
-      0.35, -0.1871,
-      0.44, -0.3271,
-      0.1475, -0.346,
-
-      0.35, -0.1871,
-      0.6475, -0.3121,
-      0.305, -0.0496,
-
-      0.35, -0.1871,
-      0.6475, -0.3121,
-      0.44, -0.3271,
-
-      0.495, 0.0679,
-      0.4675, 0.2754,
-      0.5775, 0.6954,
-
-      0.1475, -0.346,
-      0.2225, -0.4371,
-      0.14, -0.6271,
-
-      0.2225, -0.4371,
-      0.1475, -0.346,
-      0.44, -0.3271,
-
-      // Middle | Triangle Strip
-      0.2675, -0.1271,
-      0.35, -0.1871,
-      0.1475, -0.346,
-      0.1475, -0.346,
-      0.2675, -0.1271,
-      0.095, -0.2271,
-      0.095, -0.2271,
-      0.2675, -0.1271,
-      0.105, -0.1696,
+      0.2675, -0.1271, 0.1, 1,
+      0.35, -0.1871, 0.1, 1,
+      0.1475, -0.346, 0.1, 1,
+      0.1475, -0.346, 0.1, 1,
+      0.2675, -0.1271, 0.1, 1,
+      0.095, -0.2271, 0.1, 1,
+      0.095, -0.2271, 0.1, 1,
+      0.2675, -0.1271, 0.1, 1,
+      0.105, -0.1696, 0.1, 1,
      ];
 
     var vertices3 = [
@@ -602,60 +436,65 @@
 
     
     // add 0.1 in vertices 2
-    for (let i = 0; i < vertices2.length; i++){
-      vertices[i] = vertices[i] + 0.1
-    }
-
-
-    
-    // for (let i = 1; i < vertices2.length; i+=2){
-    //   vertices[i] = vertices[i] - 0.1
-    //   vertices2[i] = vertices2[i] - 0.1
+    // for (let i = 0; i < vertices2.length; i++){
+    //   vertices[i] = vertices[i] + 0.1
     // }
 
-    // add z axis
-    let temp = 2
-    for (let i = 0; i <= vertices.length; i++){
-      if (i == temp){
-        vertices.splice(i, 0, 0)
-        temp = temp + 3
-      }
-    }
+    vertices2 = vertices.map((x) => x);
     
-    let temp1 = 2
-    for (let i = 0; i <= vertices2.length; i++){
-      if (i == temp1){
-        vertices2.splice(i, 0, 0)
-        temp1 = temp1 + 3
-      }
+
+    for (let i = 2; i < vertices2.length; i+=4){
+      vertices2[i] = -0.1
     }
+
+    console.log(vertices)
+    console.log(vertices2)
+
+    // add z axis
+    // let temp = 2
+    // for (let i = 0; i <= vertices.length; i++){
+    //   if (i == temp){
+    //     vertices.splice(i, 0, 0)
+    //     temp = temp + 3
+    //   }
+    // }
+    
+    // let temp1 = 2
+    // for (let i = 0; i <= vertices2.length; i++){
+    //   if (i == temp1){
+    //     vertices2.splice(i, 0, 0.5)
+    //     temp1 = temp1 + 3
+    //   }
+    // }
 
     console.log(vertices)
 
     const buffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices2), gl.STATIC_DRAW);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
     const buffer2 = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer2);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices2), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
     const buffer3 = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer3);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices3), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(square), gl.STATIC_DRAW);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
 
     // setup model matrix;
     const modelMatrix = glMatrix.mat4.create();
-    glMatrix.mat4.rotateZ(modelMatrix, modelMatrix, glMatrix.glMatrix.toRadian(0));
+    // glMatrix.mat4.rotateZ(modelMatrix, modelMatrix, glMatrix.glMatrix.toRadian(0));
 
     // setup view matrix
     const viewMatrix = glMatrix.mat4.create();
     // glMatrix.mat4.lookAt(viewMatrix,[0.1,0.05,-0.23,1],[0,0,0,1],[0,1,0,0]);
     glMatrix.mat4.lookAt(viewMatrix,[0,0,0,1],[0,0,0,1],[0,1,0,0]);
+    // glMatrix.mat4.rotateY(viewMatrix, viewMatrix, glMatrix.glMatrix.toRadian(360));
+
     
 
     // setup projection matrix
@@ -688,10 +527,12 @@
         gl.clearColor(.6602, .6602, .6602, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT);
 
-      //same for the other object to be drawn
+
+
+      // same for the other object to be drawn
       // gl.uniform4fv(colorLocation, color2);
       gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-      gl.vertexAttribPointer(aPositionPointer, 3, gl.FLOAT, false, 0, 0);
+      gl.vertexAttribPointer(aPositionPointer, 4, gl.FLOAT, false, 0, 0);
       gl.uniform4f(colorLocation, 0.9766, 0.5039, 0.1406, 0.5);
 
       gl.drawArrays(gl.TRIANGLE_FAN, 0, 11);
@@ -741,10 +582,8 @@
       // gl.drawArrays(gl.TRIANGLE_STRIP, 0, 6);
 
 
-
-
       gl.bindBuffer(gl.ARRAY_BUFFER, buffer2);
-      gl.vertexAttribPointer(aPositionPointer, 3, gl.FLOAT, false, 0, 0);
+      gl.vertexAttribPointer(aPositionPointer, 4, gl.FLOAT, false, 0, 0);
       gl.uniform4f(colorLocation, 0.9766, 0.5039, 0.1406, 1.0);
       gl.drawArrays(gl.TRIANGLE_FAN, 0, 11);
 
@@ -847,11 +686,23 @@
       gl.uniform4f(colorLocation, 0.9063, 0.9063, 0.9063, 0.9);
       gl.drawArrays(gl.TRIANGLE_STRIP, 160, 9);
 
+      gl.disable(gl.DEPTH_TEST);
+      gl.enable(gl.BLEND)
+
+      // MULTIPLICATIVE
+      // gl.blendFunc(gl.DST_COLOR,gl.ZERO);
+      // gl.blendEquation(gl.FUNC_ADD);
+
+      gl.uniform4f(colorLocation, 1,0,0,1,);
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer3);
+      gl.vertexAttribPointer(aPositionPointer, 4, gl.FLOAT, false, 0, 0);
+      gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
+
+
       }
 
     // initial render
     drawScene();
-
     function redraw(code){
       return function(){
         //Declaration and initialization of translation,scaling,rotation factors
@@ -908,9 +759,124 @@
           0,0,1,0,
           varx,vary,0,1
           ];
+        }
 
         
+        if (code=="rotateX"){
+          let angleX = (document.getElementById("rotX")).value;
+          glMatrix.mat4.rotateX(transformationMatrix, viewMatrix, glMatrix.glMatrix.toRadian(angleX));
         }
+
+        if (code=="rotateY"){
+          let angleY = (document.getElementById("rotY")).value;
+          glMatrix.mat4.rotateY(transformationMatrix, viewMatrix, glMatrix.glMatrix.toRadian(angleY));
+        }
+        
+        if (code=="rotateZ"){
+          let angleZ = (document.getElementById("rotZ")).value;
+          glMatrix.mat4.rotateZ(transformationMatrix, viewMatrix, glMatrix.glMatrix.toRadian(angleZ));
+        }
+
+
+
+        if (code=="translate"){
+          valX= (document.getElementById("tranX")).value / 800;
+          valY= (document.getElementById("tranY")).value / 800;
+          valZ= (document.getElementById("tranY")).value / 800;
+          glMatrix.mat4.translate(transformationMatrix, viewMatrix, [valX,valY,valZ]);
+        }
+
+        if (code == "blend"){
+          var radios = document.getElementById('srcrgb');
+          var radios1 = document.getElementById('dstrgb');
+          var radios2 = document.getElementById('blendfunc');
+          // gl.blendFunc(gl.DST_COLOR,gl.ZERO);
+          // for (var i = 0, length = radios.length; i < length; i++) {
+            // if (radios[i].checked) {
+              if (radios.value == "blend1") {
+                srcrgb = gl.ZERO
+              }else if(radios.value == "blend2"){
+                srcrgb = gl.ONE
+              }else if(radios.value == "blend3"){
+                srcrgb = gl.SRC_COLOR
+              }else if(radios.value == "blend4"){
+                srcrgb = gl.ONE_MINUS_SRC_COLOR
+              }else if(radios.value == "blend5"){
+                srcrgb = gl.DST_COLOR
+              }else if(radios.value == "blend6"){
+                srcrgb = gl.ONE_MINUS_DST_COLOR
+              }else if(radios.value == "blend7"){
+                srcrgb = gl.SRC_ALPHA
+              }else if(radios.value == "blend8"){
+                srcrgb = gl.ONE_MINUS_SRC_ALPHA
+              }else if(radios.value == "blend9"){
+                srcrgb = gl.DST_ALPHA
+              }else if(radios.value == "blend10"){
+                srcrgb = gl.ONE_MINUS_DST_ALPHA
+              }else if(radios.value == "blend11"){
+                srcrgb = gl.CONSTANT_COLOR
+              }else if(radios.value == "blend12"){
+                srcrgb = gl.ONE_MINUS_CONSTANT_COLOR
+              }else if(radios.value == "blend13"){
+                srcrgb = gl.CONSTANT_ALPHA
+              }else if(radios.value == "blend14"){
+                srcrgb = gl.ONE_MINUS_CONSTANT_ALPHA
+              }else if(radios.value == "blend15"){
+                srcrgb = gl.SRC_ALPHA_SATURATE
+              }
+
+              if (radios1.value == "blend1") {
+                dstrgb = gl.ZERO
+              }else if(radios1.value == "blend2"){
+                dstrgb = gl.ONE
+              }else if(radios1.value == "blend3"){
+                dstrgb = gl.SRC_COLOR
+              }else if(radios1.value == "blend4"){
+                dstrgb = gl.ONE_MINUS_SRC_COLOR
+              }else if(radios1.value == "blend5"){
+                dstrgb = gl.DST_COLOR
+              }else if(radios1.value == "blend6"){
+                dstrgb = gl.ONE_MINUS_DST_COLOR
+              }else if(radios1.value == "blend7"){
+                dstrgb = gl.SRC_ALPHA
+              }else if(radios1.value == "blend8"){
+                dstrgb = gl.ONE_MINUS_SRC_ALPHA
+              }else if(radios1.value == "blend9"){
+                dstrgb = gl.DST_ALPHA
+              }else if(radios1.value == "blend10"){
+                dstrgb = gl.ONE_MINUS_DST_ALPHA
+              }else if(radios1.value == "blend11"){
+                dstrgb = gl.CONSTANT_COLOR
+              }else if(radios1.value == "blend12"){
+                dstrgb = gl.ONE_MINUS_CONSTANT_COLOR
+              }else if(radios1.value == "blend13"){
+                dstrgb = gl.CONSTANT_ALPHA
+              }else if(radios1.value == "blend14"){
+                dstrgb = gl.ONE_MINUS_CONSTANT_ALPHA
+              }else if(radios1.value == "blend15"){
+                dstrgb = gl.SRC_ALPHA_SATURATE
+              }
+
+              if (radios2.value == "blend1") {
+                blendfunc = gl.FUNC_ADD
+              }else if(radios2.value == "blend2"){
+                blendfunc = gl.FUNC_SUBTRACT
+              }
+
+              gl.blendFunc(srcrgb,dstrgb);
+              gl.blendEquation(blendfunc);
+
+
+
+
+              // gl.uniform4f(colorLocation, 1,0,0,1,);
+              // gl.bindBuffer(gl.ARRAY_BUFFER, buffer3);
+              // gl.vertexAttribPointer(aPositionPointer, 4, gl.FLOAT, false, 0, 0);
+              // gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
+            // }
+          // }
+        }
+
 
         //For ROTATION
 
@@ -922,12 +888,34 @@
     }
   }
 
+  // var alphaBlend = (type) => {
+  //   gl.blendFunc(gl.DST_COLOR,type);
+  //   gl.blendEquation(gl.FUNC_ADD);
+
+  //   gl.uniform4f(colorLocation, 1,0,0,1,);
+  //   gl.bindBuffer(gl.ARRAY_BUFFER, buffer3);
+  //   gl.vertexAttribPointer(aPositionPointer, 4, gl.FLOAT, false, 0, 0);
+  //   gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
+
+
+  // }
+
       //Event listeners for user inputs for the transformations
      document.getElementById("translateX").addEventListener("click", redraw("tx"));
      document.getElementById("translateY").addEventListener("click", redraw("ty"));
      document.getElementById("translate").addEventListener("click", redraw("both"));
      document.getElementById("scale").addEventListener("click",redraw("scaled"));
      document.getElementById("rotate").addEventListener("click",redraw("degrees"));
+    document.getElementById("rotX").addEventListener("input",redraw("rotateX"));
+    document.getElementById("rotY").addEventListener("input",redraw("rotateY"));
+    document.getElementById("rotZ").addEventListener("input",redraw("rotateZ"));
+
+    document.getElementById("tranX").addEventListener("input",redraw("translate"));
+    document.getElementById("tranY").addEventListener("input",redraw("translate"));
+    document.getElementById("tranZ").addEventListener("input",redraw("translate"));
+    document.getElementById("alphablend").addEventListener("click",redraw("blend"));
+
+    
 }
     // call the main program
     main();
